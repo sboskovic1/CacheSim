@@ -6,7 +6,7 @@ public class Main {
         Memory mem = new Memory();
         mem.loadSARMAtrixSpecialized();
 
-        mem.printAccesses();
+        // mem.printAccesses();
 
         Processor proc = new Processor(cache, mem);
         System.out.println("Starting simulation");

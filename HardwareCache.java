@@ -3,6 +3,7 @@ public class HardwareCache extends Cache {
 
     @Override
     public void read(int proc, int addr) {
+        if (Hardware.VERBOSE) System.out.println("Proc " + proc + " reads from " + addr + " at cycle " + cycle);
         int idx = (addr / Hardware.BLK_SIZE) % Hardware.CACHE_SIZE;
         int tag = addr / (Hardware.BLK_SIZE * Hardware.CACHE_SIZE);
         if (writers.getOrDefault(idx + tag * Hardware.CACHE_SIZE, -1) >= cycle) { // Block is in use, stall
@@ -47,6 +48,7 @@ public class HardwareCache extends Cache {
 
     @Override
     public void write(int proc, int addr) {
+        if (Hardware.VERBOSE) System.out.println("Proc " + proc + " writes to " + addr + " at cycle " + cycle);
         int idx = (addr / Hardware.BLK_SIZE) % Hardware.CACHE_SIZE;
         int tag = addr / (Hardware.BLK_SIZE * Hardware.CACHE_SIZE);
         if (writers.getOrDefault(idx + tag * Hardware.CACHE_SIZE, -1) >= cycle || readers.getOrDefault(idx + tag * Hardware.CACHE_SIZE, -1) >= cycle) { // Block is in use, stall

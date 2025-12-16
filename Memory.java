@@ -13,20 +13,26 @@ public class Memory {
 
     Queue<int[]>[] accesses;
     int terminated;
+    boolean[] running;
 
     public Memory() {
         accesses = new LinkedList[Hardware.NUM_PROCS];
+        running = new boolean[Hardware.NUM_PROCS];
         for (int i = 0; i < Hardware.NUM_PROCS; i++) {
             accesses[i] = new LinkedList<>();
+            running[i] = true;
         }
         terminated = 0;
     }
 
     int[] getNext(int proc) {
-        if (accesses[proc].isEmpty()) {
+        if (accesses[proc].isEmpty() && running[proc] == true) {
+            if (Hardware.VERBOSE) System.out.println("Process " + proc + " is terminated");
             terminated++;
+            running[proc] = false;
             return null;
         }
+        if (running[proc] == false) return null;
         return accesses[proc].poll();
     } 
 
@@ -80,20 +86,22 @@ public class Memory {
         Collections.shuffle(writes);
         int proc = 0;
         int idx = 0;
-        int split = Hardware.MEM_SIZE / 2 / (Hardware.NUM_PROCS - 1) - Hardware.MEM_SIZE / 2 % (Hardware.NUM_PROCS - 1) + Hardware.BLK_SIZE;
-        System.out.println(split);
+        int split = Hardware.NUM_PROCS == 1 ? 1 : Hardware.MEM_SIZE / 2 / (Hardware.NUM_PROCS - 1) - Hardware.MEM_SIZE / 2 % (Hardware.NUM_PROCS - 1) + Hardware.INT_SIZE;
         for (int i = 0; i < Hardware.MEM_SIZE / 2; i += Hardware.INT_SIZE) {
-            System.out.println(i);
             if (accesses[proc].size() == 2 * (Hardware.MEM_SIZE / Hardware.INT_SIZE / Hardware.NUM_PROCS)) proc++;
             accesses[0].add(new int[]{reads.get(idx), Memory.READ});
-            accesses[(writes.get(idx) - Hardware.MEM_SIZE / 2) / split + 1].add(new int[]{writes.get(idx), Memory.WRITE});
+            if (Hardware.NUM_PROCS != 1) accesses[(writes.get(idx) - Hardware.MEM_SIZE / 2) / split + 1].add(new int[]{writes.get(idx), Memory.WRITE});
             idx++;
         }
     }
 
+    public void loadHybridMemory() {
+
+    }
+
     public void printAccesses() {
         for (int i = 0; i < Hardware.NUM_PROCS; i++) {
-            System.out.println("PROC " + i + ": ");
+            System.out.println("PROC " + i + ": " + accesses[i].size());
             for (int[] j : accesses[i]) {
                 System.out.print(Arrays.toString(j) + " ");
             }

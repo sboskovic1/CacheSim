@@ -13,11 +13,11 @@ public class SARCache extends HardwareCache {
 
     @Override
     public void write(int proc, int addr) {
+        if (Hardware.NUM_PROCS == 1) return;
         if (idx[proc] == Hardware.SAR_THRESHOLD) {
             writing[proc] = !writing[proc];
             idx[proc] = 0;
-        }
-        if (writing[proc] && super.ready(proc, this.cycle)) {
+        } else if (writing[proc] && super.ready(proc, this.cycle)) {
             super.write(proc, bufs[proc][idx[proc]]);
             idx[proc]++;
         } else if (!writing[proc] && idx[proc] != Hardware.SAR_THRESHOLD) {
@@ -28,12 +28,12 @@ public class SARCache extends HardwareCache {
 
     @Override
     public boolean ready(int proc, int cycle) {
-        if (proc == 0) return super.ready(proc, this.cycle);
-        if (this.cycle < Hardware.MEM_CYCLES) return false;
+        if (proc == 0) return super.ready(proc, cycle);
+        if (cycle < Hardware.MEM_CYCLES) return false;
         if (writing[proc]) {
             write(proc, 0);
         }
-        return writing[proc];
+        return !writing[proc];
     }
 
     @Override

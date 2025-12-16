@@ -12,6 +12,7 @@ public class Processor {
 
     void run() {
         while (!memory.done()) {
+            if (Hardware.VERBOSE) System.out.println("Starting cycle " + this.cycles);
             for (int i = 0; i < Hardware.NUM_PROCS; i++) {
                 if (cache.ready(i, this.cycles)) {
                     int[] instruction = memory.getNext(i);
@@ -26,6 +27,7 @@ public class Processor {
             }
             this.cycles++;
         }
+        System.out.println("All instructions served...");
         while (!cache.done(this.cycles)) {
             this.cycles++;
         }
