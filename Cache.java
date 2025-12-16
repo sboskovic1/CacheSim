@@ -57,6 +57,10 @@ public abstract class Cache {
         }
         return terminated;
     }
+
+    public String name() {
+        return "error";
+    }
     
 
 }

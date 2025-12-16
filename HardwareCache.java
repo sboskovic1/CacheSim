@@ -95,4 +95,9 @@ public class HardwareCache extends Cache {
 
     }
 
+    @Override
+    public String name() {
+        return "Hardware Cache";
+    }
+
 }
