@@ -1,6 +1,6 @@
 public class Hardware {
 
-    public static final int NUM_PROCS = 1;
+    public static final int NUM_PROCS = 2;
 
     public static final int BLK_BITS = 5;
     public static final int BLK_SIZE = (int)Math.pow(2, BLK_BITS);
@@ -20,12 +20,13 @@ public class Hardware {
 
     public static final boolean VERBOSE = false;
 
-    public static final int SAR_THRESHOLD = 16;
+    // SAR Cache Parameters
+    public static final int SAR_THRESHOLD = 16; // Controls size of buffer before flushing
 
-    // When using the generic cache for the network patern, decide whether to assign tasks by address or access time
-    public static boolean NETWORK_SHUFFLE = false; 
+    // Hybrid Cache Parameters
     public static final int FREQUENT_BLOCKS = 4; // Number of high volume blocks in app cache
     public static final int FREQUENCY_WEIGHT = 10; // 'Weight' of high volume blocks in app cache, regular weight is 1
-    public static final double FREQUENT_ACCESS_RATE = 0.6; // Percent chance of an app cache request appearing between flow cache requests
+    public static final double FREQUENT_ACCESS_RATE = 0.75; // Percent chance of an app cache request appearing between flow cache requests
+    public static final int LRU_CACHE_FACTOR = 1; // Divides the size of the LRU caches for experimental purposes
     
 }

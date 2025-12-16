@@ -17,6 +17,7 @@ public class HardwareCache extends Cache {
             // Cache hit
             return;
         } else if (cache[proc][idx][1] == Hardware.MODIFIED) { // Writeback dirty block
+            if (Hardware.VERBOSE) System.out.println("Proc " + proc + " writeback on block starting at " + ((idx + cache[proc][idx][0] * Hardware.CACHE_SIZE) * Hardware.BLK_SIZE));
             cyclesToAdd += Hardware.MEM_CYCLES;
             writers.put(cache[proc][idx][0], cycle + cyclesToAdd);
         }
@@ -68,6 +69,7 @@ public class HardwareCache extends Cache {
             // Cache hit
             return;
         } else if (cache[proc][idx][1] == Hardware.MODIFIED) { // Writeback dirty block
+            if (Hardware.VERBOSE) System.out.println("Proc " + proc + " writeback on block starting at " + ((idx + cache[proc][idx][0] * Hardware.CACHE_SIZE) * Hardware.BLK_SIZE));
             cyclesToAdd += Hardware.MEM_CYCLES;
             writers.put(idx + tag * Hardware.CACHE_SIZE, cycle + cyclesToAdd);
         }

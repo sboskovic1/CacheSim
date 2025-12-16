@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 public class Processor {
 
     private Cache cache;
@@ -11,8 +13,8 @@ public class Processor {
     }
 
     void run() {
+        memory.reset();
         while (!memory.done()) {
-            if (Hardware.VERBOSE) System.out.println("Starting cycle " + this.cycles);
             for (int i = 0; i < Hardware.NUM_PROCS; i++) {
                 if (cache.ready(i, this.cycles)) {
                     int[] instruction = memory.getNext(i);

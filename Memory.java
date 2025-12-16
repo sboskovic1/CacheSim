@@ -11,9 +11,9 @@ public class Memory {
     public static final int READ = 0;
     public static final int WRITE = 1;
 
-    Queue<int[]>[] accesses;
-    int terminated;
-    boolean[] running;
+    public Queue<int[]>[] accesses;
+    public int terminated;
+    public boolean[] running;
 
     public Memory() {
         accesses = new LinkedList[Hardware.NUM_PROCS];
@@ -25,9 +25,17 @@ public class Memory {
         terminated = 0;
     }
 
+    void reset() {
+        running = new boolean[Hardware.NUM_PROCS];
+        for (int i = 0; i < Hardware.NUM_PROCS; i++) {
+            running[i] = true;
+        }
+        terminated = 0;
+    }
+
     int[] getNext(int proc) {
         if (accesses[proc].isEmpty() && running[proc] == true) {
-            if (Hardware.VERBOSE) System.out.println("Process " + proc + " is terminated");
+            System.out.println("Process " + proc + " terminated");
             terminated++;
             running[proc] = false;
             return null;
@@ -95,8 +103,54 @@ public class Memory {
         }
     }
 
-    public void loadHybridMemory() {
+    public List<int[]> generateHybridMemoryPattern() {
+        int[][] appBlocks = new int[Hardware.MEM_SIZE / 2 / Hardware.BLK_SIZE][2];
+        for (int i = 0; i < Hardware.FREQUENT_BLOCKS; i++) {
+            int idx = (int)(Math.random() * appBlocks.length);
+            appBlocks[idx][1] += Hardware.FREQUENCY_WEIGHT;
+        }
+        List<Integer> flowBlocks = new ArrayList<>();
+        List<Integer> weights = new ArrayList<>();
+        for (int i = 0; i < appBlocks.length; i++) {
+            int addr = Hardware.MEM_SIZE / 2 + i * Hardware.BLK_SIZE;
+            flowBlocks.add(i * Hardware.BLK_SIZE);
+            weights.add(addr);
+            for (int j = 0; j < appBlocks[i][1]; j++) {
+                weights.add(addr);
+            }
+        }
+        List<int[]> memAccesses = new ArrayList<>();
+        Collections.shuffle(flowBlocks);
+        for (Integer addr : flowBlocks) {
+            for (int i = 0; i < Hardware.BLK_SIZE; i += Hardware.INT_SIZE) {
+                memAccesses.add(new int[]{addr + i, Memory.READ});
+                while (Math.random() < Hardware.FREQUENT_ACCESS_RATE) {
+                    memAccesses.add(new int[]{weights.get((int)(Math.random() * weights.size())), Memory.READ});
+                }
+                memAccesses.add(new int[]{addr + i, Memory.WRITE});
+                while (Math.random() < Hardware.FREQUENT_ACCESS_RATE) {
+                    memAccesses.add(new int[]{weights.get((int)(Math.random() * weights.size())), Memory.READ});
+                }
+            }
+        }
+        return memAccesses;
+    }
 
+    public void loadHybridMemory(List<int[]> memoryPattern) {
+        int appIdx = 0;
+        for (int i = 0; i < memoryPattern.size(); i++) {
+            if (memoryPattern.get(i)[0] < Hardware.MEM_SIZE / 2) accesses[memoryPattern.get(i)[0] / (Hardware.MEM_SIZE / Hardware.NUM_PROCS)].add(memoryPattern.get(i));
+            else {
+                accesses[Hardware.NUM_PROCS / 2 + (appIdx % Hardware.NUM_PROCS / 2)].add(memoryPattern.get(i));
+                appIdx++;
+            }
+        }
+    }
+
+    public void loadHybridMemoryShuffled(List<int[]> memoryPattern) {
+        for (int i = 0; i < memoryPattern.size(); i++) {
+            accesses[i % Hardware.NUM_PROCS].add(memoryPattern.get(i));
+        }
     }
 
     public void printAccesses() {
